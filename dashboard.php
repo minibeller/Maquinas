@@ -1,526 +1,284 @@
 <?php
-include 'menu.php';
-include 'conexao.php';
+include_once 'menu.php';
+include_once 'conexao.php';
 
+// --- 1. CONSULTAS DE CONTAGEM (BACKGROUND) ---
+
+// Total de Máquinas
+$sql_total = "SELECT COUNT(id_maquina) as total FROM maquina";
+$res_total = $link->query($sql_total);
+$total_maquinas = ($res_total && $row = $res_total->fetch_assoc()) ? intval($row['total']) : 0;
+
+// Total de Desktops
+$sql_desk = "SELECT COUNT(id_maquina) as total FROM maquina WHERE tipo = 'desktop'";
+$res_desk = $link->query($sql_desk);
+$total_desktops = ($res_desk && $row = $res_desk->fetch_assoc()) ? intval($row['total']) : 0;
+
+// Total de Laptops
+$sql_lap = "SELECT COUNT(id_maquina) as total FROM maquina WHERE tipo = 'Laptop'";
+$res_lap = $link->query($sql_lap);
+$total_laptops = ($res_lap && $row = $res_lap->fetch_assoc()) ? intval($row['total']) : 0;
+
+// Total Windows 10 Pro
+$sql_w10 = "SELECT COUNT(id_maquina) as total FROM maquina WHERE operacional = 'WINDOWS 10 PRO'";
+$res_w10 = $link->query($sql_w10);
+$total_w10 = ($res_w10 && $row = $res_w10->fetch_assoc()) ? intval($row['total']) : 0;
+
+// Total Windows 11 Pro
+$sql_w11 = "SELECT COUNT(id_maquina) as total FROM maquina WHERE operacional = 'WINDOWS 11 PRO'";
+$res_w11 = $link->query($sql_w11);
+$total_w11 = ($res_w11 && $row = $res_w11->fetch_assoc()) ? intval($row['total']) : 0;
+
+// Total CALs de Acesso
+$sql_cals = "SELECT COUNT(id_licenciamento) as total FROM licenciamento WHERE nome_licenciamento = 'Cals de Acesso SQL Server & Cals de Acesso Windows'";
+$res_cals = $link->query($sql_cals);
+$total_cals = ($res_cals && $row = $res_cals->fetch_assoc()) ? intval($row['total']) : 0;
+
+// Total de Licenças Office (para base de cálculo das porcentagens de Office)
+$sql_total_office = "SELECT COUNT(id_licenciamento) as total FROM licenciamento WHERE nome_licenciamento LIKE '%Office%'";
+$res_total_office = $link->query($sql_total_office);
+$total_offices = ($res_total_office && $row = $res_total_office->fetch_assoc()) ? intval($row['total']) : 0;
 ?>
-<div class='rounded bg-dark p-3 '> 
-    <div class='row'>
-        <div class='col-1'></div>
-        <div class="">
-            <h1 class='text-center mb-2 mt-2 text-light' >Dashboard Máquinas</h1>
-        </div>
-        <div class='col-1'></div>
+
+<style>
+    body { background-color: #f4f6f9 !important; }
+    /* Adiciona borda superior colorida e grossa nos cards */
+    .card-vibrante-azul { border-top: 5px solid #0d6efd !important; }
+    .card-vibrante-ciano { border-top: 5px solid #0dcaf0 !important; }
+    .card-vibrante-laranja { border-top: 5px solid #fd7e14 !important; }
+    .card-vibrante-indigo { border-top: 5px solid #6610f2 !important; }
+    .card-vibrante-verde { border-top: 5px solid #198754 !important; }
+    .card-vibrante-vermelho { border-top: 5px solid #dc3545 !important; }
+
+    /* Força os ícones e seus fundos a terem cores sólidas e super nítidas */
+    .icon-box-azul { background-color: #0d6efd !important; color: white !important; }
+    .icon-box-ciano { background-color: #0dcaf0 !important; color: white !important; }
+    .icon-box-laranja { background-color: #fd7e14 !important; color: white !important; }
+    .icon-box-indigo { background-color: #6610f2 !important; color: white !important; }
+    .icon-box-verde { background-color: #198754 !important; color: white !important; }
+    .icon-box-vermelho { background-color: #dc3545 !important; color: white !important; }
+
+    /* Gradientes nas barras de progresso para dar um visual moderno e premium */
+    .progress-bar-gradient-azul { background: linear-gradient(90deg, #0d6efd, #0dcaf0) !important; }
+    .progress-bar-gradient-verde { background: linear-gradient(90deg, #198754, #a3cfbb) !important; }
+</style>
+
+<div class="container py-4">
+    <div class="pb-3 mb-4 border-bottom border-2 border-secondary-subtle">
+        <span class="text-primary text-uppercase fs-7 fw-bold">Painel Operacional</span>
+        <h1 class="h2 mb-0 text-dark fw-bold">Dashboard de Máquinas & Licenciamento</h1>
     </div>
-    
-    <div class="row">
-    <div class="col-md-4">                                <!-- Card -->
-            <div class="card border-0">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col d-flex justify-content-between">
 
-                            <div>
-                                <!-- Title -->
-                                <h5 class="d-flex align-items-center text-uppercase text-muted fw-semibold mb-2">
-                                    <span class="legend-circle-sm bg-success"></span>
-                                    Quantidade de Máquinas
-                                </h5>
-                                <!-- Subtitle -->
-                                <h2 class="mb-0">
-                                    <?php
-                                    $sql_maquinas= 'SELECT count(id_maquina) FROM maquinas.maquina';
-                                    $result_maquinas = $link->query($sql_maquinas);
-                                    if ($result_maquinas->num_rows > 0) {
-                                        // output data of each row
-                                        while ($row = $result_maquinas->fetch_assoc()) {
-                                            $quantidade_maquinas = $row['count(id_maquina)']; 
-                                            echo $quantidade_maquinas;                                                         
-                                        }
-                                    } else {
-                                        echo "0 results";
-                                    }
-                                    ?>                                                       
-                                </h2> 
-                            </div>
-
-                            <span class="text-primary">
-                               <img src="img/mo%C3%A7a.png"height="32" width="32">
-                            </span>
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow rounded-3 card-vibrante-azul">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted text-uppercase fw-bold small mb-2">Total de Máquinas</h6>
+                            <h1 class="display-5 mb-0 fw-bold text-dark"><?php echo $total_maquinas; ?></h1>
                         </div>
-                    </div> <!-- / .row -->
+                        <div class="icon-box-azul rounded-circle p-3 shadow-sm">
+                            <i class="bi bi-pc-display fs-2 d-flex"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <!-- Card -->
-            <div class="card border-0">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col d-flex justify-content-between">
-
-                            <div>
-                                <!-- Title -->
-                                <h5 class="d-flex align-items-center text-uppercase text-muted fw-semibold mb-2">
-                                    <span class="legend-circle-sm bg-success"></span>
-                                    Quantidade de Desktop
-                                </h5>
-                                <!-- Subtitle -->
-                                <h2 class="mb-0">
-                                    <?php
-                                    $sql_maquinas= "SELECT count(id_maquina) FROM maquinas.maquina where tipo = 'desktop'";
-                                    $result_maquinas = $link->query($sql_maquinas);
-                                    if ($result_maquinas->num_rows > 0) {
-                                        // output data of each row
-                                        while ($row = $result_maquinas->fetch_assoc()) {
-                                            $quantidade_maquinas = $row['count(id_maquina)']; 
-                                            echo $quantidade_maquinas;                                                         
-                                        }
-                                    } else {
-                                        echo "0 results";
-                                    }
-                                    ?>                                                       
-                                </h2> 
-                            </div>
-
-                            <span class="text-primary">
-                               <img src="img/pc.png"height="32" width="32">
-                            </span>
+            <div class="card border-0 shadow rounded-3 card-vibrante-ciano">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted text-uppercase fw-bold small mb-2">Total Desktops</h6>
+                            <h1 class="display-5 mb-0 fw-bold text-dark"><?php echo $total_desktops; ?></h1>
                         </div>
-                    </div> <!-- / .row -->
+                        <div class="icon-box-ciano rounded-circle p-3 shadow-sm">
+                            <i class="bi bi-display fs-2 d-flex"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
         <div class="col-md-4">
-
-            <!-- Card -->
-            <div class="card border-0">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col d-flex justify-content-between">
-
-                            <div>
-                                <!-- Title -->
-                                <h5 class="d-flex align-items-center text-uppercase text-muted fw-semibold mb-2">
-                                    <span class="legend-circle-sm bg-success"></span>
-                                    Quantidade de Laptop
-                                </h5>
-                                <!-- Subtitle -->
-                                <h2 class="mb-0">
-                                    <?php
-                                    $sql_maquinas= "SELECT count(id_maquina) FROM maquinas.maquina where tipo = 'Laptop'";
-                                    $result_maquinas = $link->query($sql_maquinas);
-                                    if ($result_maquinas->num_rows > 0) {
-                                        // output data of each row
-                                        while ($row = $result_maquinas->fetch_assoc()) {
-                                            $quantidade_maquinas = $row['count(id_maquina)']; 
-                                            echo $quantidade_maquinas;                                                         
-                                        }
-                                    } else {
-                                        echo "0 results";
-                                    }
-                                    ?>                                                       
-                                </h2> 
-                            </div>
-
-                            <span class="text-primary">
-                               <img src="img/computador-portatil.png"height="32" width="32">
-                            </span>
+            <div class="card border-0 shadow rounded-3 card-vibrante-laranja">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted text-uppercase fw-bold small mb-2">Total Laptops</h6>
+                            <h1 class="display-5 mb-0 fw-bold text-dark"><?php echo $total_laptops; ?></h1>
                         </div>
-                    </div> <!-- / .row -->
+                        <div class="icon-box-laranja rounded-circle p-3 shadow-sm">
+                            <i class="bi bi-laptop fs-2 d-flex"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-      <div class="row mt-5">
-    <div class="col-md-4">                                <!-- Card -->
-            <div class="card border-0">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col d-flex justify-content-between">
 
-                            <div>
-                                <!-- Title -->
-                                <h5 class="d-flex align-items-center text-uppercase text-muted fw-semibold mb-2">
-                                    <span class="legend-circle-sm bg-success"></span>
-                                    Windows 10 Pro
-                                </h5>
-                                <!-- Subtitle -->
-                                <h2 class="mb-0">
-                                    <?php
-                                    $sql_maquinas= "SELECT count(id_maquina) FROM maquinas.maquina where operacional = 'WINDOWS 10 PRO'";
-                                    $result_maquinas = $link->query($sql_maquinas);
-                                    if ($result_maquinas->num_rows > 0) {
-                                        // output data of each row
-                                        while ($row = $result_maquinas->fetch_assoc()) {
-                                            $quantidade_maquinas = $row['count(id_maquina)']; 
-                                            echo $quantidade_maquinas;                                                         
-                                        }
-                                    } else {
-                                        echo "0 results";
-                                    }
-                                    ?>                                                       
-                                </h2> 
-                            </div>
-
-                            <span class="text-primary">
-                               <img src="img/janelas.png"height="32" width="32">
-                            </span>
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card border-0 shadow rounded-3 card-vibrante-indigo">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted text-uppercase fw-bold small mb-2">Windows 10 Pro</h6>
+                            <h1 class="display-5 mb-0 fw-bold text-dark"><?php echo $total_w10; ?></h1>
                         </div>
-                    </div> <!-- / .row -->
+                        <div class="icon-box-indigo rounded-circle p-3 shadow-sm">
+                            <i class="bi bi-microsoft fs-2 d-flex"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <!-- Card -->
-            <div class="card border-0">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col d-flex justify-content-between">
-
-                            <div>
-                                <!-- Title -->
-                                <h5 class="d-flex align-items-center text-uppercase text-muted fw-semibold mb-2">
-                                    <span class="legend-circle-sm bg-success"></span>
-                                    windows 11 Pro
-                                </h5>
-                                <!-- Subtitle -->
-                                <h2 class="mb-0">
-                                    <?php
-                                      $sql_maquinas= "SELECT count(id_maquina) FROM maquinas.maquina where operacional = 'WINDOWS 11 PRO'";
-                                    $result_maquinas = $link->query($sql_maquinas);
-                                    if ($result_maquinas->num_rows > 0) {
-                                        // output data of each row
-                                        while ($row = $result_maquinas->fetch_assoc()) {
-                                            $quantidade_maquinas = $row['count(id_maquina)']; 
-                                            echo $quantidade_maquinas;                                                         
-                                        }
-                                    } else {
-                                        echo "0 results";
-                                    }
-                                    ?>                                                       
-                                </h2> 
-                            </div>
-
-                            <span class="text-primary">
-                               <img src="img/janelas.png"height="32" width="32">
-                            </span>
+            <div class="card border-0 shadow rounded-3 card-vibrante-verde">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted text-uppercase fw-bold small mb-2">Windows 11 Pro</h6>
+                            <h1 class="display-5 mb-0 fw-bold text-dark"><?php echo $total_w11; ?></h1>
                         </div>
-                    </div> <!-- / .row -->
+                        <div class="icon-box-verde rounded-circle p-3 shadow-sm">
+                            <i class="bi bi-windows fs-2 d-flex"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
         <div class="col-md-4">
-            <!-- Card -->
-            <div class="card border-0">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col d-flex justify-content-between">
-
-                            <div>
-                                <!-- Title -->
-                                <h5 class="d-flex align-items-center text-uppercase text-muted fw-semibold mb-2">
-                                    <span class="legend-circle-sm bg-success"></span>
-                                    Cals de Acesso SQL & Windows
-                                </h5>
-                                <!-- Subtitle -->
-                                <h2 class="mb-0">
-                                    <?php
-                                      $sql_maquinas= "SELECT count(nome_licenciamento) FROM maquinas.licenciamento where nome_licenciamento = 'Cals de Acesso SQL Server & Cals de Acesso Windows'";
-                                    $result_maquinas = $link->query($sql_maquinas);
-                                    if ($result_maquinas->num_rows > 0) {
-                                        // output data of each row
-                                        while ($row = $result_maquinas->fetch_assoc()) {
-                                            $quantidade_maquinas = $row['count(nome_licenciamento)']; 
-                                            echo $quantidade_maquinas;                                                         
-                                        }
-                                    } else {
-                                        echo "0 results";
-                                    }
-                                    ?>                                                       
-                                </h2> 
-                            </div>
-
-                            <span class="text-primary">
-                               <img src="img/janelas.png"height="32" width="32">
-                            </span>
+            <div class="card border-0 shadow rounded-3 card-vibrante-vermelho">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted text-uppercase fw-bold small mb-2">CALs de Acesso</h6>
+                            <h1 class="display-5 mb-0 fw-bold text-dark"><?php echo $total_cals; ?></h1>
                         </div>
-                    </div> <!-- / .row -->
+                        <div class="icon-box-vermelho rounded-circle p-3 shadow-sm">
+                            <i class="bi bi-key fs-2 d-flex"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-      
     </div>
-    
-   
-    
-    <div class='row mt-5'>
-     
+
+    <div class="row g-4 mb-5">
         
-            <div class="col-6 d-flex ">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow rounded-3 h-100">
+                <div class="card-header bg-white border-0 pt-4 pb-2">
+                    <h5 class="card-title fw-extrabold text-primary text-uppercase m-0">
+                        <i class="bi bi-box-seam me-2 text-primary"></i>Licenciamento Microsoft Office
+                    </h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0 table-hover">
+                        <thead class="table-primary text-uppercase fs-7">
+                            <tr>
+                                <th class="ps-4 py-3">Versão</th>
+                                <th class="text-center py-3">Qtd</th>
+                                <th class="pe-4 text-center py-3" style="width: 40%;">Porcentagem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $versoes_office = [
+                                "Home & Business 2016" => "Microsoft Office Home & Business 2016 Microsoft",
+                                "Home & Business 2019" => "Microsoft Office Home & Business 2019 Microsoft",
+                                "Home & Business 2021" => "Microsoft Office Home & Business 2021 Microsoft",
+                                "H&B Perpétuo 2016 DVD" => "Office Home & Business perpétuo 2016 em DVD"
+                            ];
 
-                        <!-- Card -->
-                <div class="card border-0 flex-fill w-100" data-list="{&quot;valueNames&quot;: [&quot;name&quot;, &quot;price&quot;, &quot;quantity&quot;, &quot;amount&quot;, {&quot;name&quot;: &quot;sales&quot;, &quot;attr&quot;: &quot;data-sales&quot;}], &quot;page&quot;: 5}" id="topSellingProducts">
-                    <div class="card-header border-0 card-header-space-between">
-
-                        <!-- Title -->
-                        <h2 class="card-header-title h4 text-uppercase">
-                            Licenciamento Microsoft Office
-                        </h2>                  
-                  
-                    </div>
-
-                    <!-- Table -->
-                    <div class="table-responsive">
-                        <table class="table align-middle table-edge table-nowrap mb-0">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>
-                                        <a href="javascript: void(0);" class="text-muted list-sort" >
-                                            Tipo de licenciamento
-                                        </a>
-                                    </th>
-                                    <th class="text-center">
-                                        <a href="javascript: void(0);" class="text-muted list-sort" >
-                                            Quant de licenças 
-                                        </a>
-                                    </th>
-                                
-                                    <th class="text-center pe-7 min-w-200px">
-                                        <a href="javascript: void(0);" class="text-muted list-sort" >
-                                            Porcentagem
-                                        </a>
-                                    </th>
-                                </tr>
-                            
-                            </thead>
-                            <tbody class="list">
-                                <?php 
-                                $sql_tabela = "SELECT count(nome_licenciamento) FROM maquinas.licenciamento where nome_licenciamento like '%Office%';";
-                                $result = $link->query($sql_tabela);
-
-
-                                if ($result->num_rows > 0) {
-                                    // output data of each row
-                                    while ($row = $result->fetch_assoc()) {
-                                        $quantidade_office = $row['count(nome_licenciamento)'];                                
-                                    }
-                                } else {
-                                    echo "0 results";
-                                }
-
-
-                                $sql_tabela_1 = "SELECT count(nome_licenciamento) FROM maquinas.licenciamento where nome_licenciamento = 'Microsoft Office Home & Business 2016 Microsoft';";
-                                $result1 = $link->query($sql_tabela_1);
-
-
-                                if ($result1->num_rows > 0) {
-                                    // output data of each row
-                                    while ($row1 = $result1->fetch_assoc()) {
-                                        
-                                        
-                                        $quantidade_office1 = $row1['count(nome_licenciamento)'];    
-                                     
-                                        $porcentagem = $quantidade_office - $quantidade_office1;
-                                       
-                                        echo '      <tr>
-                                        <td class="name fw-bold"> Home & Business 2016 Microsoft</td>
-                                        <td class="price text-center">'.$quantidade_office1.'</td>
-                                        <td class="sales" >
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="progress d-flex flex-grow-1">
-                                                    <div class="progress-bar" role="progressbar" style="width: '.$quantidade_office1.'%"  aria-valuemin="0" aria-valuemax="100"></div>
-                                                </div>
-                                                <span class="ms-3 text-muted">'.$quantidade_office1.'%</span>
-                                            </div>
-                                        </td>
-                                    </tr>';
-                                    }
-                                } else {
-                                    echo "0 results";
-                                }
-
-
-                                $sql_tabela_2 = "SELECT count(nome_licenciamento) FROM maquinas.licenciamento where nome_licenciamento = 'Microsoft Office Home & Business 2019 Microsoft';";
-                                 $result2 = $link->query($sql_tabela_2);
-
-
-                                if ($result2->num_rows > 0) {
-                                    // output data of each row
-                                    while ($row2 = $result2->fetch_assoc()) {
-                                        $quantidade_office2 = $row2['count(nome_licenciamento)'];        
-                                        
-                                        $porcentagem = $quantidade_office - $quantidade_office2;
-                                       
-                                        echo '      <tr>
-                                        <td class="name fw-bold">Home & Business 2019 Microsoft</td>
-                                        <td class="price text-center">'.$quantidade_office2.'</td>
-                                        <td class="sales" >
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="progress d-flex flex-grow-1">
-                                                    <div class="progress-bar" role="progressbar" style="width: '.$quantidade_office2.'%"  aria-valuemin="0" aria-valuemax="100"></div>
-                                                </div>
-                                                <span class="ms-3 text-muted">'.$quantidade_office2.'%</span>
-                                            </div>
-                                        </td>
-                                    </tr>';
-                                    }
-                                } else {
-                                    echo "0 results";
-                                }
-
-
-
-                                $sql_tabela_3 = "SELECT count(nome_licenciamento) FROM maquinas.licenciamento where nome_licenciamento = 'Microsoft Office Home & Business 2021 Microsoft';";                            
-                                 $result3 = $link->query($sql_tabela_3);
-
-
-                                if ($result3->num_rows > 0) {
-                                    // output data of each row
-                                    while ($row3 = $result3->fetch_assoc()) {
-                                        $quantidade_office3 = $row3['count(nome_licenciamento)'];          
-                                              $quantidade_office3 = $row3['count(nome_licenciamento)'];        
-                                        
-                                        $porcentagem = $quantidade_office - $quantidade_office3;
-                                       
-                                        echo '      <tr>
-                                        <td class="name fw-bold">Home & Business 2021 Microsoft</td>
-                                        <td class="price text-center">'.$quantidade_office3.'</td>
-                                        <td class="sales" >
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="progress d-flex flex-grow-1">
-                                                    <div class="progress-bar" role="progressbar" style="width: '.$quantidade_office3.'%"  aria-valuemin="0" aria-valuemax="100"></div>
-                                                </div>
-                                                <span class="ms-3 text-muted">'.$quantidade_office3.'%</span>
-                                            </div>
-                                        </td>
-                                    </tr>';
-                                    }
-                                    
-                                } else {
-                                    echo "0 results";
-                                }
-                                $sql_tabela_4 = "SELECT count(nome_licenciamento) FROM maquinas.licenciamento where nome_licenciamento = 'Office Home & Business perpétuo 2016 em DVD';";
-
-                                 $result4 = $link->query($sql_tabela_4);
-
-
-                                if ($result4->num_rows > 0) {
-                                    // output data of each row
-                                    while ($row4 = $result4->fetch_assoc()) {
-                                        $quantidade_office4 = $row4['count(nome_licenciamento)'];         
-                                              $quantidade_office4 = $row4['count(nome_licenciamento)'];        
-                                        
-                                        $porcentagem = $quantidade_office - $quantidade_office4;
-                                       
-                                        echo '      <tr>
-                                        <td class="name fw-bold">Home & Business perpétuo 2016 em DVD</td>
-                                        <td class="price text-center">'.$quantidade_office4.'</td>
-                                        <td class="sales" >
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="progress d-flex flex-grow-1">
-                                                    <div class="progress-bar" role="progressbar" style="width: '.$quantidade_office4.'%"  aria-valuemin="0" aria-valuemax="100"></div>
-                                                </div>
-                                                <span class="ms-3 text-muted">'.$quantidade_office4.'%</span>
-                                            </div>
-                                        </td>
-                                    </tr>';
-                                    }
-                                    
-                                } else {
-                                    echo "0 results";
-                                }
-                                   
-
+                            foreach ($versoes_office as $label => $nome_banco) {
+                                $sql_v = "SELECT COUNT(id_licenciamento) as qtd FROM licenciamento WHERE nome_licenciamento = '$nome_banco'";
+                                $res_v = $link->query($sql_v);
+                                $qtd = ($res_v && $row = $res_v->fetch_assoc()) ? intval($row['qtd']) : 0;
+                                $pct = ($total_offices > 0) ? round(($qtd / $total_offices) * 100, 1) : 0;
                                 ?>
-                        
-                            </tbody>
-                        </table>
-                    </div> <!-- / .table-responsive -->
+                                <tr>
+                                    <td class="ps-4 fw-bold text-dark"><?php echo $label; ?></td>
+                                    <td class="text-center">
+                                        <span class="badge bg-primary fs-6 px-3 py-1.5 rounded-pill"><?php echo $qtd; ?></span>
+                                    </td>
+                                    <td class="pe-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1" style="height: 10px;">
+                                                <div class="progress-bar progress-bar-gradient-azul rounded" role="progressbar" style="width: <?php echo $pct; ?>%" aria-valuenow="<?php echo $pct; ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <span class="ms-3 text-dark fw-bold small" style="min-width: 50px; text-align: right;"><?php echo $pct; ?>%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php
+                            }
+                            ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-       
-               <div class="col-6  d-flex ">
+        </div>
 
-                        <!-- Card -->
-                <div class="card border-0 flex-fill w-100" data-list="{&quot;valueNames&quot;: [&quot;name&quot;, &quot;price&quot;, &quot;quantity&quot;, &quot;amount&quot;, {&quot;name&quot;: &quot;sales&quot;, &quot;attr&quot;: &quot;data-sales&quot;}], &quot;page&quot;: 5}" id="topSellingProducts">
-                    <div class="card-header border-0 card-header-space-between">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow rounded-3 h-100">
+                <div class="card-header bg-white border-0 pt-4 pb-2">
+                    <h5 class="card-title fw-extrabold text-success text-uppercase m-0">
+                        <i class="bi bi-diagram-3 me-2 text-success"></i>Setores com mais Máquinas
+                    </h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0 table-hover">
+                        <thead class="table-success text-uppercase fs-7">
+                            <tr>
+                                <th class="ps-4 py-3">Nome Setor</th>
+                                <th class="text-center py-3">Qtd Ativos</th>
+                                <th class="pe-4 text-center py-3" style="width: 40%;">Porcentagem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $sql_setores = "SELECT setor, COUNT(*) AS quantidade_maquinas FROM maquina GROUP BY setor ORDER BY quantidade_maquinas DESC LIMIT 4";
+                            $result_setores = $link->query($sql_setores);
 
-                        <!-- Title -->
-                        <h2 class="card-header-title h4 text-uppercase">
-                            Setores com mais Máquinas
-                        </h2>                  
-                  
-                    </div>
-
-                    <!-- Table -->
-                    <div class="table-responsive">
-                        <table class="table align-middle table-edge table-nowrap mb-0">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>
-                                        <a href="javascript: void(0);" class="text-muted list-sort" >
-                                            Nome Setor
-                                        </a>
-                                    </th>
-                                    <th class="text-center">
-                                        <a href="javascript: void(0);" class="text-muted list-sort" >
-                                            Quant de Máquinas
-                                        </a>
-                                    </th>
-                                
-                                    <th class="text-center pe-7 min-w-200px">
-                                        <a href="javascript: void(0);" class="text-muted list-sort" >
-                                            Porcentagem
-                                        </a>
-                                    </th>
-                                </tr>
-                            
-                            </thead>
-                            <tbody class="list">
-                                <?php 
-                                $sql_tabela = "SELECT setor, COUNT(*) AS quantidade_maquinas FROM maquina GROUP BY setor ORDER BY quantidade_maquinas DESC LIMIT 4;";
-                                $result = $link->query($sql_tabela);
-
-
-                                if ($result->num_rows > 0) {
-                                    // output data of each row
-                                    while ($row = $result->fetch_assoc()) {
-                                        $setor = $row['setor'];   
-                                        $quantidade_maquina = $row['quantidade_maquinas'];                                    
-                                        echo '      <tr>
-                                        <td class="name fw-bold">'.$setor.'</td>
-                                        <td class="price text-center">'.$quantidade_maquina.'</td>
-                                        <td class="sales" >
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="progress d-flex flex-grow-1">
-                                                    <div class="progress-bar" role="progressbar" style="width: '.$quantidade_maquina.'%"  aria-valuemin="0" aria-valuemax="100"></div>
+                            if ($result_setores && $result_setores->num_rows > 0) {
+                                while ($row_setor = $result_setores->fetch_assoc()) {
+                                    $setor = !empty($row_setor['setor']) ? $row_setor['setor'] : "Não Definido";
+                                    $qtd_maquina = intval($row_setor['quantidade_maquinas']);
+                                    $pct_setor = ($total_maquinas > 0) ? round(($qtd_maquina / $total_maquinas) * 100, 1) : 0;
+                                    ?>
+                                    <tr>
+                                        <td class="ps-4 fw-bold text-dark"><?php echo htmlspecialchars($setor); ?></td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success fs-6 px-3 py-1.5 rounded-pill"><?php echo $qtd_maquina; ?></span>
+                                        </td>
+                                        <td class="pe-4">
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress flex-grow-1" style="height: 10px;">
+                                                    <div class="progress-bar progress-bar-gradient-verde rounded" role="progressbar" style="width: <?php echo $pct_setor; ?>%" aria-valuenow="<?php echo $pct_setor; ?>" aria-valuemin="0" aria-valuemax="100"></div>
                                                 </div>
-                                                <span class="ms-3 text-muted">'.$quantidade_maquina.'%</span>
+                                                <span class="ms-3 text-dark fw-bold small" style="min-width: 50px; text-align: right;"><?php echo $pct_setor; ?>%</span>
                                             </div>
                                         </td>
-                                    </tr>';
-                                        
-                                    }
-                                } else {
-                                    echo "0 results";
+                                    </tr>
+                                    <?php
                                 }
-
-
-                               
-                             
-
-                                ?>
-                        
-                            </tbody>
-                        </table>
-                    </div> <!-- / .table-responsive -->
+                            } else {
+                                echo "<tr><td colspan='3' class='text-center py-4 text-muted'>Nenhum setor cadastrado.</td></tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </div>
 
-       
     </div>
-
-    
 </div>
+</body>
+</html>
